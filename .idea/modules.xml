@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/NLP_app.iml" filepath="$PROJECT_DIR$/.idea/NLP_app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Natural_Language_Processing.iml" filepath="$PROJECT_DIR$/.idea/Natural_Language_Processing.iml" />
     </modules>
   </component>
 </project>

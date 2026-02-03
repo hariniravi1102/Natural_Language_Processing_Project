@@ -1,40 +1,37 @@
-from diffusers import StableDiffusionPipeline
-import torch
 import streamlit as st
-from diffusers import StableDiffusionPipeline
 import torch
+from diffusers import StableDiffusionPipeline
+
+if not torch.cuda.is_available():
+    raise RuntimeError("CUDA GPU not available. Please check your PyTorch / GPU install.")
+
+device = "cuda"
+st.write(f"Using device: {device}, GPU: {torch.cuda.get_device_name(0)}")
 
 pipe = StableDiffusionPipeline.from_pretrained(
     "runwayml/stable-diffusion-v1-5",
-    torch_dtype=torch.float32,  # CPU requires float32
+    torch_dtype=torch.float16,
+    device_map="cuda",
 )
 
 
-def generate_image(prompt):
+def generate_image(prompt: str):
     with torch.autocast("cuda"):
-        image = pipe(prompt, num_inference_steps=30).images[0]
+        out = pipe(prompt, num_inference_steps=30)
+        image = out.images[0]
     return image
 
-st.title("Text-to-Image Generator")
+st.title("Text to Image Generator")
 
-# Text input box
 user_prompt = st.text_input("Text to image generation:")
 
-
-
-# Generate and display image
 if st.button("Enter"):
     if user_prompt:
-        st.write("Generating image...")
+        st.write("Generating image on GPU...")
         img = generate_image(user_prompt)
         st.image(img, caption=f"Generated for: {user_prompt}", use_column_width=True)
-        # Here you can add your image generation code using user_prompt
     else:
         st.warning("Please enter some text before pressing Enter.")
 
-#
-
-
-if st.button("⬅ back to main page"):
-    # Your redirect or logic here
+if st.button(" back to main page"):
     st.switch_page("main.py")

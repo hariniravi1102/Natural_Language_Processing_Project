@@ -11,7 +11,7 @@ from io import BytesIO
 from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load Hugging Face embedding model
+# Load Hugging Face
 @st.cache_resource
 
 def load_model():
@@ -49,7 +49,6 @@ def plot_similarity_graph(papers, sim_matrix):
     buf.seek(0)
     return buf
 
-# --- UI ---
 st.set_page_config(page_title="Research Paper Explorer", layout="wide")
 st.title("Research Paper Explorer")
 
@@ -58,7 +57,7 @@ max_results = st.slider("Number of papers to fetch:", 5, 50, 15)
 show_graph = st.checkbox("Show similarity graph", value=True)
 
 if st.button("Search"):
-    with st.spinner("Fetching and ranking papers..."):
+    with st.spinner("Fetching "):
         tokenizer, model = load_model()
         papers = search_arxiv(query, max_results=max_results)
 
@@ -68,24 +67,22 @@ if st.button("Search"):
         query_vec = get_embedding(query, tokenizer, model).unsqueeze(0)
         sims = cosine_similarity(query_vec, embeddings)[0]
 
-        # Sort papers by similarity
         ranked = sorted(zip(sims, papers), key=lambda x: x[0], reverse=True)
 
-        st.subheader("📄 Top Relevant Papers")
+        st.subheader("Top Relevant Papers")
         for score, paper in ranked:
-            st.markdown(f"### [{paper.title}]({paper.link})")
-            st.markdown(f"**Authors:** {paper.author}")
-            st.markdown(f"**Published:** {paper.published.split('T')[0]}")
-            st.markdown(f"**Relevance Score:** {score:.2f}")
+            st.markdown(f"[{paper.title}]({paper.link})")
+            st.markdown(f"Authors:{paper.author}")
+            st.markdown(f"Published:{paper.published.split('T')[0]}")
+            st.markdown(f"Relevance Score:{score:.2f}")
             st.markdown(paper.summary[:500] + "...")
-            st.markdown("---")
+            st.markdown("")
 
         if show_graph:
-            st.subheader("📊 Similarity Graph Between Papers")
+            st.subheader("Similarity Graph Between Papers")
             sim_matrix = cosine_similarity(embeddings)
             buf = plot_similarity_graph(papers, sim_matrix)
             st.image(buf, use_column_width=True)
 
-if st.button("⬅ back to main page"):
-    # Your redirect or logic here
+if st.button("back to main page"):
     st.switch_page("main.py")

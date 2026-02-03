@@ -7,14 +7,12 @@ from langchain.llms import HuggingFacePipeline
 from langchain.chains import RetrievalQA
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
-# Load embedding model (on GPU if available)
 @st.cache_resource
 def get_embedder():
     return HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-# Load LLM (use Mistral or TinyLlama)
 @st.cache_resource
 def get_llm():
     model_id = "mistralai/Mistral-7B-Instruct-v0.1"
@@ -23,7 +21,6 @@ def get_llm():
     pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=256)
     return HuggingFacePipeline(pipeline=pipe)
 
-# Fetch and split Wikipedia text
 def get_wiki_chunks(topic):
     try:
         page = wikipedia.page(topic)
@@ -33,15 +30,14 @@ def get_wiki_chunks(topic):
     except:
         return []
 
-# Streamlit App
-st.title("🌍 General Knowledge Chatbot")
+st.title("General Knowledge Chatbot")
 topic = st.text_input("Enter a topic :")
 
 if topic:
-    with st.spinner("Fetching and indexing..."):
+    with st.spinner("Fetching"):
         chunks = get_wiki_chunks(topic)
         if not chunks:
-            st.error("Topic not found or no content.")
+            st.error("Topic not found")
         else:
             embedder = get_embedder()
             vectorstore = FAISS.from_texts(chunks, embedder)
@@ -53,8 +49,7 @@ if topic:
             question = st.text_input("Ask a question about this topic:")
             if question:
                 answer = rag_chain.run(question)
-                st.write("**🤖 Answer:**", answer)
+                st.write("Answer:", answer)
 
-if st.button("⬅ back to main page"):
-    # Your redirect or logic here
+if st.button("back to main page"):
     st.switch_page("main.py")
